@@ -1,0 +1,19 @@
+use std::result;
+
+use thiserror::Error as ThisError;
+
+pub type Result<T> = result::Result<T, Error>;
+
+#[derive(ThisError, Debug)]
+pub enum Error {
+    #[error("RPC error")]
+    RPC(#[from] rpc::error::Error),
+    #[error("json error")]
+    JSON(#[from] serde_json::Error),
+    #[error("dotenv error")]
+    DotEnv(#[from] dotenv::Error),
+    #[error("response not success: {0}")]
+    BadResponse(String),
+    #[error("response no contain arguments")]
+    NoArguments,
+}
