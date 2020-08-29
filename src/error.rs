@@ -6,8 +6,8 @@ pub type Result<T> = result::Result<T, Error>;
 
 #[derive(ThisError, Debug)]
 pub enum Error {
-    #[error("RPC error")]
-    RPC(#[from] rpc::error::Error),
+    #[error("NC error")]
+    NC(#[from] nc::error::Error),
     #[error("json error")]
     JSON(#[from] serde_json::Error),
     #[error("dotenv error")]

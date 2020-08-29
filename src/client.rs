@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use rpc::StatusCode;
+use nc::StatusCode;
 
 use crate::error::Result;
 use crate::request::RpcRequest;
@@ -23,8 +23,8 @@ impl Client {
         self
     }
 
-    async fn get_response(&self, body: &Bytes) -> Result<rpc::Response> {
-        let cb = rpc::Client::builder();
+    async fn get_response(&self, body: &Bytes) -> Result<nc::Response> {
+        let cb = nc::Client::builder();
         let mut client = cb
             .post(&self.uri)
             .header("Content-Type", "application/json")
