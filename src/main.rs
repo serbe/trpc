@@ -23,17 +23,17 @@ async fn run() -> Result<()> {
     // let _ = client.session_close().await?;
     // let body = client.free_space("c:").await?;
     // println!("{:?}", body);
-    // let _body = client
-    //     .torrent_get(
-    //         vec![
-    //             torrent::TorrentFields::Priorities,
-    //             torrent::TorrentFields::Pieces,
-    //             torrent::TorrentFields::Wanted,
-    //         ],
-    //         Some(request::IDS::One(1)),
-    //     )
-    //     .await?;
-    // println!("{:?}", body);
+    let body = client
+        .torrent_get(torrent::TorrentGetArgs {
+            fields: vec![
+                torrent::TorrentFields::Priorities,
+                torrent::TorrentFields::Pieces,
+                torrent::TorrentFields::Wanted,
+            ],
+            ids: Some(request::IDS::One(1)),
+        })
+        .await?;
+    println!("{:?}", body);
 
     delay_for(Duration::from_millis(1000)).await;
     Ok(())

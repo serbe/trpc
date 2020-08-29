@@ -28,16 +28,17 @@ pub enum Method {
     TorrentVerify,
     TorrentReannounce,
     TorrentGet,
+    TorrentAdd,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ID {
     I(i64),
     S(String),
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub enum IDS {
     One(i64),
     Many(Vec<ID>),

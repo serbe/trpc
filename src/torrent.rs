@@ -182,7 +182,7 @@ pub struct Webseed {
     pub webseed: String,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Torrent {
     pub activity_date: Option<i64>,
@@ -259,20 +259,76 @@ pub struct Torrent {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TorrentAddResponse {
+    pub hash_string: String,
+    pub id: i64,
+    pub name: String,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct TorrentGetArgs {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ids: Option<IDS>,
+    pub fields: Vec<TorrentFields>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct TorrentAddArgs {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cookies: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub download_dir: Option<String>,
+    pub filename: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metainfo: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub paused: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub peer_limit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "bandwidthPriority")]
+    pub bandwidth_priority: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub files_wanted: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub files_unwanted: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub priority_high: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub priority_low: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub priority_normal: Option<i64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TorrentGet {
-  pub torrents: Vec<Torrent>,
+    pub torrents: Vec<Torrent>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TorrentAdd {
+    pub torrent: Option<TorrentAddResponse>,
+    #[serde(rename = "torrent-duplicate")]
+    pub torrent_duplicate: Option<TorrentAddResponse>,
 }
 
 impl Client {
-    pub async fn torrent_get(
-        &mut self,
-        fields: Vec<TorrentFields>,
-        ids: Option<IDS>,
-    ) -> Result<TorrentGet> {
-        let arguments = json!({"ids": ids,"fields": fields});
+    pub async fn torrent_get(&mut self, args: TorrentGetArgs) -> Result<TorrentGet> {
         let request = RpcRequest {
             method: Method::TorrentGet,
-            arguments: Some(arguments),
+            arguments: Some(json!(args)),
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let parsed_value = serde_json::from_value(value_from_response(response)?)?;
+        Ok(parsed_value)
+    }
+
+    pub async fn torrent_add(&mut self, args: TorrentAddArgs) -> Result<TorrentAdd> {
+        let request = RpcRequest {
+            method: Method::TorrentGet,
+            arguments: Some(json!(args)),
             tag: None,
         };
         let response = self.send_msg(&request).await?;
