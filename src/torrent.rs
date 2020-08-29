@@ -302,6 +302,29 @@ pub struct TorrentAddArgs {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct TorrentRemoveArgs {
+    pub ids: IDS,
+    pub delete_local_data: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct TorrentSetLocationArgs {
+    pub ids: IDS,
+    pub location: String,
+    #[serde(rename = "move")]
+    pub move_local_data: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TorrentRenamePathArgs {
+    pub ids: IDS,
+    pub path: String,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TorrentGet {
     pub torrents: Vec<Torrent>,
 }
@@ -311,6 +334,13 @@ pub struct TorrentAdd {
     pub torrent: Option<TorrentAddResponse>,
     #[serde(rename = "torrent-duplicate")]
     pub torrent_duplicate: Option<TorrentAddResponse>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TorrentRenamePath {
+    pub id: i64,
+    pub name: String,
+    pub path: String,
 }
 
 impl Client {
@@ -327,7 +357,43 @@ impl Client {
 
     pub async fn torrent_add(&mut self, args: TorrentAddArgs) -> Result<TorrentAdd> {
         let request = RpcRequest {
-            method: Method::TorrentGet,
+            method: Method::TorrentAdd,
+            arguments: Some(json!(args)),
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let parsed_value = serde_json::from_value(value_from_response(response)?)?;
+        Ok(parsed_value)
+    }
+
+    pub async fn torrent_remove(&mut self, args: TorrentRemoveArgs) -> Result<()> {
+        let request = RpcRequest {
+            method: Method::TorrentRemove,
+            arguments: Some(json!(args)),
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn torrent_set_location(&mut self, args: TorrentSetLocationArgs) -> Result<()> {
+        let request = RpcRequest {
+            method: Method::TorrentSetLocation,
+            arguments: Some(json!(args)),
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn torrent_rename_path(
+        &mut self,
+        args: TorrentRenamePathArgs,
+    ) -> Result<TorrentRenamePath> {
+        let request = RpcRequest {
+            method: Method::TorrentAdd,
             arguments: Some(json!(args)),
             tag: None,
         };

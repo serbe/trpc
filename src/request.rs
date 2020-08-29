@@ -29,19 +29,22 @@ pub enum Method {
     TorrentReannounce,
     TorrentGet,
     TorrentAdd,
+    TorrentRemove,
+    TorrentSetLocation,
+    TorrentRenamePath,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ID {
-    I(i64),
-    S(String),
+    ID(i64),
+    Hash(String),
 }
 
 #[derive(Debug, Deserialize)]
 pub enum IDS {
-    One(i64),
-    Many(Vec<ID>),
+    ID(i64),
+    Array(Vec<ID>),
     RecentlyAdded,
 }
 
@@ -51,8 +54,8 @@ impl Serialize for IDS {
         S: Serializer,
     {
         match self {
-            IDS::One(i) => serializer.serialize_i64(*i),
-            IDS::Many(v) => v.serialize(serializer),
+            IDS::ID(id) => serializer.serialize_i64(*id),
+            IDS::Array(values) => values.serialize(serializer),
             IDS::RecentlyAdded => serializer.serialize_str("recently-active"),
         }
     }
