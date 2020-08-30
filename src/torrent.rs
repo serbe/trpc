@@ -1,10 +1,22 @@
+use std::io::Read;
+
+use base64::encode_config_buf;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{json};
 
 use crate::client::Client;
 use crate::error::Result;
 use crate::request::{Method, RpcRequest, IDS};
 use crate::response::value_from_response;
+
+pub fn file_to_metadata(path: &str) -> Result<String> {
+    let mut file = std::fs::File::open(&path)?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer)?;
+    let mut buf = String::new();
+    encode_config_buf(buffer, base64::STANDARD, &mut buf);
+    Ok(buf)
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -394,6 +406,86 @@ pub struct TorrentRenamePath {
 }
 
 impl Client {
+    pub async fn torrent_start(&mut self, args: Option<IDS>) -> Result<()> {
+        let value = if let Some(args) = args {
+            Some(json!(args))
+        } else {
+            None
+        };
+        let request = RpcRequest {
+            method: Method::TorrentStart,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn torrent_start_now(&mut self, args: Option<IDS>) -> Result<()> {
+        let value = if let Some(args) = args {
+            Some(json!(args))
+        } else {
+            None
+        };
+        let request = RpcRequest {
+            method: Method::TorrentStartNow,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+    
+    pub async fn torrent_stop(&mut self, args: Option<IDS>) -> Result<()> {
+        let value = if let Some(args) = args {
+            Some(json!(args))
+        } else {
+            None
+        };
+        let request = RpcRequest {
+            method: Method::TorrentStop,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+    
+    pub async fn torrent_verify(&mut self, args: Option<IDS>) -> Result<()> {
+        let value = if let Some(args) = args {
+            Some(json!(args))
+        } else {
+            None
+        };
+        let request = RpcRequest {
+            method: Method::TorrentVerify,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+    
+    pub async fn torrent_reannounce(&mut self, args: Option<IDS>) -> Result<()> {
+        let value = if let Some(args) = args {
+            Some(json!(args))
+        } else {
+            None
+        };
+        let request = RpcRequest {
+            method: Method::TorrentReannounce,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
     pub async fn torrent_set(&mut self, args: TorrentSetArgs) -> Result<()> {
         let request = RpcRequest {
             method: Method::TorrentSet,

@@ -18,4 +18,6 @@ pub enum Error {
     NoArguments,
     #[error("unmutable fields in session-set")]
     WrongSessionSetFields,
+    #[error("io error")]
+    IO(#[from] std::io::Error),
 }
