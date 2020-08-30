@@ -267,6 +267,56 @@ pub struct TorrentAddResponse {
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TorrentSetArgs {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bandwidth_priority: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub download_limit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub download_limited: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "files-wanted")]
+    pub files_wanted: Option<File>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "files-unwanted")]
+    pub files_unwanted: Option<File>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub honors_session_limits: Option<bool>,
+    pub ids: IDS,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub labels: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "peer-limit")]
+    pub peer_limit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "priority-high")]
+    pub priority_high: Option<File>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "priority-low")]
+    pub priority_low: Option<File>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "priority-normal")]
+    pub priority_normal: Option<File>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub queue_position: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub seed_idle_limit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub seed_idle_mode: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub seed_ratio_limit: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub seed_ratio_mode: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tracker_add: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tracker_remove: Option<IDS>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tracker_replace: Option<IDS>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upload_limit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upload_limited: Option<bool>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct TorrentGetArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ids: Option<IDS>,
@@ -344,6 +394,17 @@ pub struct TorrentRenamePath {
 }
 
 impl Client {
+    pub async fn torrent_set(&mut self, args: TorrentSetArgs) -> Result<()> {
+        let request = RpcRequest {
+            method: Method::TorrentSet,
+            arguments: Some(json!(args)),
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
     pub async fn torrent_get(&mut self, args: TorrentGetArgs) -> Result<TorrentGet> {
         let request = RpcRequest {
             method: Method::TorrentGet,

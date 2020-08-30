@@ -27,6 +27,7 @@ pub enum Method {
     TorrentStop,
     TorrentVerify,
     TorrentReannounce,
+    TorrentSet,
     TorrentGet,
     TorrentAdd,
     TorrentRemove,
@@ -46,6 +47,12 @@ pub enum IDS {
     ID(i64),
     Array(Vec<ID>),
     RecentlyAdded,
+}
+
+impl Default for IDS {
+    fn default() -> Self {
+        IDS::RecentlyAdded
+    }
 }
 
 impl Serialize for IDS {
