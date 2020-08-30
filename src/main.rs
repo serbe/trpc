@@ -34,6 +34,12 @@ async fn run() -> Result<()> {
     //     })
     //     .await?;
     // println!("{:?}", body);
+    let body = client
+        .session_get(Some(session::SessionGetArgs {
+            fields: vec![session::SessionFields::SessionID],
+        }))
+        .await?;
+    println!("{:?}", body);
 
     delay_for(Duration::from_millis(1000)).await;
     Ok(())

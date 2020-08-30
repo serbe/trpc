@@ -16,4 +16,6 @@ pub enum Error {
     BadResponse(String),
     #[error("response no contain arguments")]
     NoArguments,
+    #[error("unmutable fields in session-set")]
+    WrongSessionSetFields,
 }

@@ -17,6 +17,7 @@ pub struct RpcRequest {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all(serialize = "kebab-case"))]
 pub enum Method {
+    SessionGet,
     SessionStats,
     BlocklistUpdate,
     PortTest,
