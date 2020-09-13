@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use nc::StatusCode;
+use netc::StatusCode;
 
 use crate::error::Result;
 use crate::request::RpcRequest;
@@ -23,8 +23,8 @@ impl Client {
         self
     }
 
-    async fn get_response(&self, body: &Bytes) -> Result<nc::Response> {
-        let cb = nc::Client::builder();
+    async fn get_response(&self, body: &Bytes) -> Result<netc::Response> {
+        let cb = netc::Client::builder();
         let mut client = cb
             .post(&self.uri)
             .header("Content-Type", "application/json")

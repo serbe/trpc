@@ -7,7 +7,7 @@ pub type Result<T> = result::Result<T, Error>;
 #[derive(ThisError, Debug)]
 pub enum Error {
     #[error("NC error")]
-    NC(#[from] nc::error::Error),
+    NC(#[from] netc::error::Error),
     #[error("json error")]
     JSON(#[from] serde_json::Error),
     #[error("dotenv error")]
