@@ -1,5 +1,5 @@
 use tokio::runtime::Runtime;
-use tokio::time::{delay_for, Duration};
+use tokio::time::{sleep, Duration};
 
 use client::Client;
 use error::Result;
@@ -41,7 +41,7 @@ async fn run() -> Result<()> {
         .await?;
     println!("{:?}", body);
 
-    delay_for(Duration::from_millis(1000)).await;
+    sleep(Duration::from_millis(1000)).await;
     Ok(())
 }
 
@@ -49,7 +49,7 @@ fn main() {
     dotenv::dotenv().ok().unwrap();
     env_logger::init();
 
-    let mut rt = Runtime::new().unwrap();
+    let rt = Runtime::new().unwrap();
 
     rt.block_on(async { run().await.unwrap() });
 }
