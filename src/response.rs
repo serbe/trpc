@@ -33,7 +33,7 @@ pub fn value_from_response(response: RpcResponse) -> Result<Value> {
     if &response.result == "success" {
         Ok(response
             .arguments
-            .map_or(Err(Error::NoArguments), |v| Ok(v))?)
+            .map_or(Err(Error::NoArguments), Ok)?)
     } else {
         Err(Error::BadResponse(response.result))
     }
