@@ -2,7 +2,7 @@ use tokio::runtime::Runtime;
 use tokio::time::{sleep, Duration};
 
 use client::Client;
-use error::Result;
+use error::Error;
 
 mod client;
 mod error;
@@ -11,7 +11,7 @@ mod response;
 mod session;
 mod torrent;
 
-async fn run() -> Result<()> {
+async fn run() -> Result<(), Error> {
     let uri = dotenv::var("TARGET")?;
     let mut client = Client::new(&uri);
     // let body = client.session_stats().await?;
@@ -30,7 +30,7 @@ async fn run() -> Result<()> {
     //             torrent::TorrentFields::Pieces,
     //             torrent::TorrentFields::Wanted,
     //         ],
-    //         ids: Some(request::IDS::ID(1)),
+    //         ids: Some(request::Ids::Id(1)),
     //     })
     //     .await?;
     // println!("{:?}", body);

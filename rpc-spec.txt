@@ -476,7 +476,7 @@ from: https://github.com/transmission/transmission/blob/master/extras/rpc-spec.t
    "path"                           | string     the path to the file or folder that will be renamed
    "name"                           | string     the file or folder's new name
 
-   Response arguments: "path", "name", and "id", holding the torrent ID integer
+   Response arguments: "path", "name", and "id", holding the torrent Id integer
 
 
 4.   Session Requests

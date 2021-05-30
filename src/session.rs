@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::client::Client;
-use crate::error::{Error, Result};
+use crate::error::{Error};
 use crate::request::{Method, RpcRequest};
 use crate::response::value_from_response;
 
@@ -206,7 +206,7 @@ pub struct SessionGetArgs {
 }
 
 impl Client {
-    pub async fn session_stats(&mut self) -> Result<SessionStats> {
+    pub async fn session_stats(&mut self) -> Result<SessionStats, Error> {
         let request = RpcRequest {
             method: Method::SessionStats,
             arguments: None,
@@ -217,7 +217,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn session_close(&mut self) -> Result<()> {
+    pub async fn session_close(&mut self) -> Result<(), Error> {
         let request = RpcRequest {
             method: Method::SessionClose,
             arguments: None,
@@ -228,12 +228,8 @@ impl Client {
         Ok(())
     }
 
-    pub async fn session_get(&mut self, args: Option<SessionGetArgs>) -> Result<Session> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn session_get(&mut self, args: Option<SessionGetArgs>) -> Result<Session, Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::SessionGet,
             arguments: value,
@@ -244,7 +240,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn session_set(&mut self, args: Session) -> Result<()> {
+    pub async fn session_set(&mut self, args: Session) -> Result<(), Error> {
         if args.blocklist_size.is_some() || args.config_dir.is_some() || args.rpc_version.is_some() || args.rpc_version_minimum.is_some()
         || args.version.is_some() || args.session_id.is_some() {
             return Err(Error::WrongSessionSetFields);

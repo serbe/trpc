@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json};
 
 use crate::client::Client;
-use crate::error::Result;
-use crate::request::{Method, RpcRequest, IDS};
+use crate::error::Error;
+use crate::request::{Method, RpcRequest, Ids};
 use crate::response::value_from_response;
 
-pub fn file_to_metadata(path: &str) -> Result<String> {
+pub fn file_to_metadata(path: &str) -> Result<String, Error> {
     let mut file = std::fs::File::open(&path)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
@@ -293,7 +293,7 @@ pub struct TorrentSetArgs {
     pub files_unwanted: Option<File>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub honors_session_limits: Option<bool>,
-    pub ids: IDS,
+    pub ids: Ids,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub labels: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -319,9 +319,9 @@ pub struct TorrentSetArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tracker_add: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tracker_remove: Option<IDS>,
+    pub tracker_remove: Option<Ids>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tracker_replace: Option<IDS>,
+    pub tracker_replace: Option<Ids>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub upload_limit: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -331,7 +331,7 @@ pub struct TorrentSetArgs {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct TorrentGetArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ids: Option<IDS>,
+    pub ids: Option<Ids>,
     pub fields: Vec<TorrentFields>,
 }
 
@@ -366,14 +366,14 @@ pub struct TorrentAddArgs {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct TorrentRemoveArgs {
-    pub ids: IDS,
+    pub ids: Ids,
     pub delete_local_data: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct TorrentSetLocationArgs {
-    pub ids: IDS,
+    pub ids: Ids,
     pub location: String,
     #[serde(rename = "move")]
     pub move_local_data: bool,
@@ -381,7 +381,7 @@ pub struct TorrentSetLocationArgs {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TorrentRenamePathArgs {
-    pub ids: IDS,
+    pub ids: Ids,
     pub path: String,
     pub name: String,
 }
@@ -406,12 +406,8 @@ pub struct TorrentRenamePath {
 }
 
 impl Client {
-    pub async fn torrent_start(&mut self, args: Option<IDS>) -> Result<()> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn torrent_start(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::TorrentStart,
             arguments: value,
@@ -422,12 +418,8 @@ impl Client {
         Ok(())
     }
 
-    pub async fn torrent_start_now(&mut self, args: Option<IDS>) -> Result<()> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn torrent_start_now(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::TorrentStartNow,
             arguments: value,
@@ -438,12 +430,8 @@ impl Client {
         Ok(())
     }
     
-    pub async fn torrent_stop(&mut self, args: Option<IDS>) -> Result<()> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn torrent_stop(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::TorrentStop,
             arguments: value,
@@ -454,12 +442,8 @@ impl Client {
         Ok(())
     }
     
-    pub async fn torrent_verify(&mut self, args: Option<IDS>) -> Result<()> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn torrent_verify(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::TorrentVerify,
             arguments: value,
@@ -470,12 +454,8 @@ impl Client {
         Ok(())
     }
     
-    pub async fn torrent_reannounce(&mut self, args: Option<IDS>) -> Result<()> {
-        let value = if let Some(args) = args {
-            Some(json!(args))
-        } else {
-            None
-        };
+    pub async fn torrent_reannounce(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
         let request = RpcRequest {
             method: Method::TorrentReannounce,
             arguments: value,
@@ -486,7 +466,7 @@ impl Client {
         Ok(())
     }
 
-    pub async fn torrent_set(&mut self, args: TorrentSetArgs) -> Result<()> {
+    pub async fn torrent_set(&mut self, args: TorrentSetArgs) -> Result<(), Error> {
         let request = RpcRequest {
             method: Method::TorrentSet,
             arguments: Some(json!(args)),
@@ -497,7 +477,7 @@ impl Client {
         Ok(())
     }
 
-    pub async fn torrent_get(&mut self, args: TorrentGetArgs) -> Result<TorrentGet> {
+    pub async fn torrent_get(&mut self, args: TorrentGetArgs) -> Result<TorrentGet, Error> {
         let request = RpcRequest {
             method: Method::TorrentGet,
             arguments: Some(json!(args)),
@@ -508,7 +488,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn torrent_add(&mut self, args: TorrentAddArgs) -> Result<TorrentAdd> {
+    pub async fn torrent_add(&mut self, args: TorrentAddArgs) -> Result<TorrentAdd, Error> {
         let request = RpcRequest {
             method: Method::TorrentAdd,
             arguments: Some(json!(args)),
@@ -519,7 +499,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn torrent_remove(&mut self, args: TorrentRemoveArgs) -> Result<()> {
+    pub async fn torrent_remove(&mut self, args: TorrentRemoveArgs) -> Result<(), Error> {
         let request = RpcRequest {
             method: Method::TorrentRemove,
             arguments: Some(json!(args)),
@@ -530,7 +510,7 @@ impl Client {
         Ok(())
     }
 
-    pub async fn torrent_set_location(&mut self, args: TorrentSetLocationArgs) -> Result<()> {
+    pub async fn torrent_set_location(&mut self, args: TorrentSetLocationArgs) -> Result<(), Error> {
         let request = RpcRequest {
             method: Method::TorrentSetLocation,
             arguments: Some(json!(args)),
@@ -544,7 +524,7 @@ impl Client {
     pub async fn torrent_rename_path(
         &mut self,
         args: TorrentRenamePathArgs,
-    ) -> Result<TorrentRenamePath> {
+    ) -> Result<TorrentRenamePath, Error> {
         let request = RpcRequest {
             method: Method::TorrentAdd,
             arguments: Some(json!(args)),

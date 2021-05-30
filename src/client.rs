@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use netc::StatusCode;
 
-use crate::error::Result;
+use crate::error::Error;
 use crate::request::RpcRequest;
 use crate::response::RpcResponse;
 
@@ -23,7 +23,7 @@ impl Client {
         self
     }
 
-    async fn get_response(&self, body: &Bytes) -> Result<netc::Response> {
+    async fn get_response(&self, body: &Bytes) -> Result<netc::Response, Error> {
         let cb = netc::Client::builder();
         let mut client = cb
             .post(&self.uri)
@@ -35,7 +35,7 @@ impl Client {
         Ok(client.send().await?)
     }
 
-    pub async fn send_msg(&mut self, input: &RpcRequest) -> Result<RpcResponse> {
+    pub async fn send_msg(&mut self, input: &RpcRequest) -> Result<RpcResponse, Error> {
         let mut buf = vec![];
         serde_json::to_writer(&mut buf, &input)?;
         let body = buf.into();

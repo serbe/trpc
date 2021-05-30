@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{json, Value};
 
 use crate::client::Client;
-use crate::error::{Error, Result};
+use crate::error::{Error};
 use crate::response::{BlocklistUpdate, FreeSpace, PortTest, RpcResponse};
 
 #[derive(Serialize, Deserialize)]
@@ -11,7 +11,7 @@ pub struct RpcRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arguments: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tag: Option<IDS>,
+    pub tag: Option<Ids>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -38,33 +38,33 @@ pub enum Method {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum ID {
-    ID(i64),
+pub enum Id {
+    Id(i64),
     Hash(String),
 }
 
 #[derive(Debug, Deserialize)]
-pub enum IDS {
-    ID(i64),
-    Array(Vec<ID>),
+pub enum Ids {
+    Id(i64),
+    Array(Vec<Id>),
     RecentlyAdded,
 }
 
-impl Default for IDS {
+impl Default for Ids {
     fn default() -> Self {
-        IDS::RecentlyAdded
+        Ids::RecentlyAdded
     }
 }
 
-impl Serialize for IDS {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+impl Serialize for Ids {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         match self {
-            IDS::ID(id) => serializer.serialize_i64(*id),
-            IDS::Array(values) => values.serialize(serializer),
-            IDS::RecentlyAdded => serializer.serialize_str("recently-active"),
+            Ids::Id(id) => serializer.serialize_i64(*id),
+            Ids::Array(values) => values.serialize(serializer),
+            Ids::RecentlyAdded => serializer.serialize_str("recently-active"),
         }
     }
 }
@@ -79,7 +79,7 @@ impl Serialize for IDS {
 //     path: String,
 // }
 
-pub fn value_from_response(response: RpcResponse) -> Result<Value> {
+pub fn value_from_response(response: RpcResponse) -> Result<Value, Error> {
     if &response.result == "success" {
         Ok(response
             .arguments
@@ -90,7 +90,7 @@ pub fn value_from_response(response: RpcResponse) -> Result<Value> {
 }
 
 impl Client {
-    pub async fn blocklist_update(&mut self) -> Result<BlocklistUpdate> {
+    pub async fn blocklist_update(&mut self) -> Result<BlocklistUpdate, Error> {
         let request = RpcRequest {
             method: Method::BlocklistUpdate,
             arguments: None,
@@ -101,7 +101,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn port_test(&mut self) -> Result<PortTest> {
+    pub async fn port_test(&mut self) -> Result<PortTest, Error> {
         let request = RpcRequest {
             method: Method::PortTest,
             arguments: None,
@@ -112,7 +112,7 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn free_space(&mut self, path: &str) -> Result<FreeSpace> {
+    pub async fn free_space(&mut self, path: &str) -> Result<FreeSpace, Error> {
         let request = RpcRequest {
             method: Method::FreeSpace,
             arguments: Some(json!({"path": path.to_string()})),

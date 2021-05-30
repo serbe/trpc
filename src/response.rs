@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::error::{Error, Result};
+use crate::error::{Error};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RpcResponse {
@@ -29,7 +29,7 @@ pub struct FreeSpace {
     pub size_bytes: i64,
 }
 
-pub fn value_from_response(response: RpcResponse) -> Result<Value> {
+pub fn value_from_response(response: RpcResponse) -> Result<Value, Error> {
     if &response.result == "success" {
         Ok(response
             .arguments
