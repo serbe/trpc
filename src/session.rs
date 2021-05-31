@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::client::Client;
-use crate::error::{Error};
+use crate::error::Error;
 use crate::request::{Method, RpcRequest};
 use crate::response::value_from_response;
 
@@ -206,21 +206,19 @@ pub struct SessionGetArgs {
 }
 
 impl Client {
-    pub async fn session_stats(&mut self) -> Result<SessionStats, Error> {
+    pub async fn session_set(&mut self, args: Session) -> Result<(), Error> {
+        if args.blocklist_size.is_some()
+            || args.config_dir.is_some()
+            || args.rpc_version.is_some()
+            || args.rpc_version_minimum.is_some()
+            || args.version.is_some()
+            || args.session_id.is_some()
+        {
+            return Err(Error::WrongSessionSetFields);
+        }
         let request = RpcRequest {
-            method: Method::SessionStats,
-            arguments: None,
-            tag: None,
-        };
-        let response = self.send_msg(&request).await?;
-        let parsed_value = serde_json::from_value(value_from_response(response)?)?;
-        Ok(parsed_value)
-    }
-
-    pub async fn session_close(&mut self) -> Result<(), Error> {
-        let request = RpcRequest {
-            method: Method::SessionClose,
-            arguments: None,
+            method: Method::SessionGet,
+            arguments: Some(json!(args)),
             tag: None,
         };
         let response = self.send_msg(&request).await?;
@@ -240,14 +238,21 @@ impl Client {
         Ok(parsed_value)
     }
 
-    pub async fn session_set(&mut self, args: Session) -> Result<(), Error> {
-        if args.blocklist_size.is_some() || args.config_dir.is_some() || args.rpc_version.is_some() || args.rpc_version_minimum.is_some()
-        || args.version.is_some() || args.session_id.is_some() {
-            return Err(Error::WrongSessionSetFields);
-        }
+    pub async fn session_stats(&mut self) -> Result<SessionStats, Error> {
         let request = RpcRequest {
-            method: Method::SessionGet,
-            arguments: Some(json!(args)),
+            method: Method::SessionStats,
+            arguments: None,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let parsed_value = serde_json::from_value(value_from_response(response)?)?;
+        Ok(parsed_value)
+    }
+
+    pub async fn session_close(&mut self) -> Result<(), Error> {
+        let request = RpcRequest {
+            method: Method::SessionClose,
+            arguments: None,
             tag: None,
         };
         let response = self.send_msg(&request).await?;
