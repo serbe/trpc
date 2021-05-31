@@ -2,11 +2,11 @@ use std::io::Read;
 
 use base64::encode_config_buf;
 use serde::{Deserialize, Serialize};
-use serde_json::{json};
+use serde_json::json;
 
 use crate::client::Client;
 use crate::error::Error;
-use crate::request::{Method, RpcRequest, Ids};
+use crate::request::{Ids, Method, RpcRequest};
 use crate::response::value_from_response;
 
 pub fn file_to_metadata(path: &str) -> Result<String, Error> {
@@ -39,6 +39,8 @@ pub enum TorrentFields {
     ErrorString,
     Eta,
     EtaIdle,
+    #[serde(rename = "file-count")]
+    FileCount,
     Files,
     FileStats,
     HashString,
@@ -68,6 +70,8 @@ pub enum TorrentFields {
     PieceCount,
     PieceSize,
     Priorities,
+    #[serde(rename = "primary-mime-type")]
+    PrimaryMimeType,
     QueuePosition,
     RateDownload,
     RateUpload,
@@ -215,6 +219,8 @@ pub struct Torrent {
     pub error_string: Option<String>,
     pub eta: Option<i64>,
     pub eta_idle: Option<i64>,
+    #[serde(rename = "file-count")]
+    pub file_count: Option<i64>,
     pub files: Option<Vec<File>>,
     pub file_stats: Option<Vec<FileStats>>,
     pub hash_string: Option<String>,
@@ -244,6 +250,8 @@ pub struct Torrent {
     pub piece_count: Option<i64>,
     pub piece_size: Option<i64>,
     pub priorities: Option<Vec<i64>>,
+    #[serde(rename = "primary-mime-type")]
+    pub primary_mime_type: Option<String>,
     pub queue_position: Option<i64>,
     pub rate_download: Option<i64>,
     pub rate_upload: Option<i64>,
@@ -429,7 +437,7 @@ impl Client {
         let _ = value_from_response(response)?;
         Ok(())
     }
-    
+
     pub async fn torrent_stop(&mut self, args: Option<Ids>) -> Result<(), Error> {
         let value = args.map(|args| json!(args));
         let request = RpcRequest {
@@ -441,7 +449,7 @@ impl Client {
         let _ = value_from_response(response)?;
         Ok(())
     }
-    
+
     pub async fn torrent_verify(&mut self, args: Option<Ids>) -> Result<(), Error> {
         let value = args.map(|args| json!(args));
         let request = RpcRequest {
@@ -453,7 +461,7 @@ impl Client {
         let _ = value_from_response(response)?;
         Ok(())
     }
-    
+
     pub async fn torrent_reannounce(&mut self, args: Option<Ids>) -> Result<(), Error> {
         let value = args.map(|args| json!(args));
         let request = RpcRequest {
@@ -510,7 +518,10 @@ impl Client {
         Ok(())
     }
 
-    pub async fn torrent_set_location(&mut self, args: TorrentSetLocationArgs) -> Result<(), Error> {
+    pub async fn torrent_set_location(
+        &mut self,
+        args: TorrentSetLocationArgs,
+    ) -> Result<(), Error> {
         let request = RpcRequest {
             method: Method::TorrentSetLocation,
             arguments: Some(json!(args)),
