@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{json, Value};
 
 use crate::client::Client;
-use crate::error::{Error};
+use crate::error::Error;
 use crate::response::{BlocklistUpdate, FreeSpace, PortTest, RpcResponse};
 
 #[derive(Serialize, Deserialize)]
@@ -34,6 +34,10 @@ pub enum Method {
     TorrentRemove,
     TorrentSetLocation,
     TorrentRenamePath,
+    QueueMoveTop,
+    QueueMoveUp,
+    QueueMoveDown,
+    QueueMoveBottom,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -47,12 +51,12 @@ pub enum Id {
 pub enum Ids {
     Id(i64),
     Array(Vec<Id>),
-    RecentlyAdded,
+    RecentlyActive,
 }
 
 impl Default for Ids {
     fn default() -> Self {
-        Ids::RecentlyAdded
+        Ids::RecentlyActive
     }
 }
 
@@ -64,26 +68,14 @@ impl Serialize for Ids {
         match self {
             Ids::Id(id) => serializer.serialize_i64(*id),
             Ids::Array(values) => values.serialize(serializer),
-            Ids::RecentlyAdded => serializer.serialize_str("recently-active"),
+            Ids::RecentlyActive => serializer.serialize_str("recently-active"),
         }
     }
 }
 
-// #[derive(Serialize, Deserialize)]
-// pub enum RequestArgs {
-//     FreeSpaceArgs(FreeSpaceArgs),
-// }
-
-// #[derive(Serialize, Deserialize)]
-// pub struct FreeSpaceArgs {
-//     path: String,
-// }
-
 pub fn value_from_response(response: RpcResponse) -> Result<Value, Error> {
     if &response.result == "success" {
-        Ok(response
-            .arguments
-            .map_or(Err(Error::NoArguments), Ok)?)
+        Ok(response.arguments.map_or(Err(Error::NoArguments), Ok)?)
     } else {
         Err(Error::BadResponse(response.result))
     }
@@ -121,5 +113,53 @@ impl Client {
         let response = self.send_msg(&request).await?;
         let parsed_value = serde_json::from_value(value_from_response(response)?)?;
         Ok(parsed_value)
+    }
+
+    pub async fn queue_move_top(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
+        let request = RpcRequest {
+            method: Method::QueueMoveTop,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn queue_move_up(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
+        let request = RpcRequest {
+            method: Method::QueueMoveUp,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn queue_move_down(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
+        let request = RpcRequest {
+            method: Method::QueueMoveDown,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
+    }
+
+    pub async fn queue_move_bottom(&mut self, args: Option<Ids>) -> Result<(), Error> {
+        let value = args.map(|args| json!(args));
+        let request = RpcRequest {
+            method: Method::QueueMoveBottom,
+            arguments: value,
+            tag: None,
+        };
+        let response = self.send_msg(&request).await?;
+        let _ = value_from_response(response)?;
+        Ok(())
     }
 }
