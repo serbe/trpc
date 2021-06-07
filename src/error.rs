@@ -14,4 +14,6 @@ pub enum Error {
     WrongSessionSetFields,
     #[error("io error")]
     Io(#[from] std::io::Error),
+    #[error("not auth")]
+    NotAuth,
 }

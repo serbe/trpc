@@ -27,6 +27,8 @@ impl Client {
         let cb = netc::Client::builder();
         let mut client = cb
             .post(&self.uri)
+            .header("Cache-Control", "no-cache")
+            .header("Pragma", "no-cache")
             .header("Content-Type", "application/json")
             .header("X-Transmission-Session-Id", &self.id)
             .body(body.clone())
@@ -40,6 +42,9 @@ impl Client {
         serde_json::to_writer(&mut buf, &input)?;
         let body = buf.into();
         let response = self.get_response(&body).await?;
+        if Ok(response.status_code()) == StatusCode::from_u16(401u16) {
+            return Err(Error::NotAuth);
+        }
         let response_body = if Ok(response.status_code()) == StatusCode::from_u16(409u16) {
             if let Some(id) = response.headers().get("X-Transmission-Session-Id") {
                 let response = self.set_id(id).get_response(&body).await?;
