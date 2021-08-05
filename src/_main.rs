@@ -14,8 +14,8 @@ mod torrent;
 async fn run() -> Result<(), Error> {
     let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
     let mut client = Client::new(&uri);
-    // let body = client.session_stats().await?;
-    // println!("{:?}", body);
+    let body = client.session_stats().await?;
+    println!("{:?}", body);
     // let body = client.port_test().await?;
     // println!("{:?}", body);
     // let body = client.blocklist_update().await?;
