@@ -16,4 +16,8 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("not auth")]
     NotAuth,
+    #[error("TorrentAdd args have both filename and metadata")]
+    BothFileMeta,
+    #[error("TorrentAdd args no have filename or metadata")]
+    NoFileMeta,
 }

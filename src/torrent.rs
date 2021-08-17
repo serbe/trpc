@@ -350,7 +350,8 @@ pub struct TorrentAddArgs {
     pub cookies: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub download_dir: Option<String>,
-    pub filename: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metainfo: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -369,6 +370,43 @@ pub struct TorrentAddArgs {
     pub priority_low: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub priority_normal: Option<i64>,
+}
+
+impl TorrentAddArgs {
+    pub fn from_meta(path: &str) -> Result<Self, Error> {
+        let metainfo = Some(file_to_metadata(path)?);
+        Ok(TorrentAddArgs {
+            cookies: None,
+            download_dir: None,
+            filename: None,
+            metainfo,
+            paused: None,
+            peer_limit: None,
+            bandwidth_priority: None,
+            files_wanted: None,
+            files_unwanted: None,
+            priority_high: None,
+            priority_low: None,
+            priority_normal: None,
+        })
+    }
+
+    pub fn from_file(path: &str) -> Result<Self, Error> {
+        Ok(TorrentAddArgs {
+            cookies: None,
+            download_dir: None,
+            filename: Some(path.to_string()),
+            metainfo: None,
+            paused: None,
+            peer_limit: None,
+            bandwidth_priority: None,
+            files_wanted: None,
+            files_unwanted: None,
+            priority_high: None,
+            priority_low: None,
+            priority_normal: None,
+        })
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -497,6 +535,11 @@ impl Client {
     }
 
     pub async fn torrent_add(&mut self, args: TorrentAddArgs) -> Result<TorrentAdd, Error> {
+        match (&args.filename, &args.metainfo) {
+            (Some(_), Some(_)) => Err(Error::BothFileMeta),
+            (None, None) => Err(Error::NoFileMeta),
+            _ => Ok(()),
+        }?;
         let request = RpcRequest {
             method: Method::TorrentAdd,
             arguments: Some(json!(args)),

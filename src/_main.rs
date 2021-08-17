@@ -3,6 +3,7 @@ use tokio::time::{sleep, Duration};
 
 use client::Client;
 use error::Error;
+use torrent::TorrentAddArgs;
 
 mod client;
 mod error;
@@ -12,10 +13,10 @@ mod session;
 mod torrent;
 
 async fn run() -> Result<(), Error> {
-    let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
-    let mut client = Client::new(&uri);
-    let body = client.session_stats().await?;
-    println!("{:?}", body);
+    // let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
+    // let mut client = Client::new(&uri);
+    // let body = client.session_stats().await?;
+    // println!("{:?}", body);
     // let body = client.port_test().await?;
     // println!("{:?}", body);
     // let body = client.blocklist_update().await?;
@@ -40,6 +41,16 @@ async fn run() -> Result<(), Error> {
     //     }))
     //     .await?;
     // println!("{:?}", body);
+
+    let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
+
+    let mut client = Client::new(&uri);
+    let args = TorrentAddArgs::from_file(
+        "magnet:?xt=urn:btih:6a0a9282c65fc6a1324e6e1605fe9bb9746c3aa8&dn=test%20dir",
+    )
+    .unwrap();
+    let body = client.torrent_add(args).await.unwrap();
+    dbg!(body);
 
     sleep(Duration::from_millis(1000)).await;
     Ok(())
