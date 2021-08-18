@@ -1,3 +1,5 @@
+use std::convert::From;
+
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{json, Value};
 
@@ -47,6 +49,24 @@ pub enum Id {
     Hash(String),
 }
 
+impl From<i64> for Id {
+    fn from(id: i64) -> Self {
+        Id::Id(id)
+    }
+}
+
+impl From<&str> for Id {
+    fn from(hash: &str) -> Self {
+        Id::Hash(hash.to_string())
+    }
+}
+
+impl From<String> for Id {
+    fn from(hash: String) -> Self {
+        Id::Hash(hash)
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub enum Ids {
     Id(i64),
@@ -57,6 +77,22 @@ pub enum Ids {
 impl Default for Ids {
     fn default() -> Self {
         Ids::RecentlyActive
+    }
+}
+
+impl From<i64> for Ids {
+    fn from(id: i64) -> Self {
+        Ids::Id(id)
+    }
+}
+
+impl From<Vec<Id>> for Ids {
+    fn from(values: Vec<Id>) -> Self {
+        let mut arr = Vec::new();
+        for value in values {
+            arr.push(value);
+        }
+        Ids::Array(arr)
     }
 }
 

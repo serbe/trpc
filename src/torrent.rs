@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::io::Read;
 
 use base64::encode_config_buf;
@@ -96,6 +97,88 @@ pub enum TorrentFields {
     Wanted,
     Webseeds,
     WebseedsSendingToUs,
+}
+
+impl TryFrom<&str> for TorrentFields {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Error> {
+        match value.to_lowercase().as_str() {
+            "activitydate" => Ok(TorrentFields::ActivityDate),
+            "addeddate" => Ok(TorrentFields::AddedDate),
+            "bandwidthpriority" => Ok(TorrentFields::BandwidthPriority),
+            "comment" => Ok(TorrentFields::Comment),
+            "corruptever" => Ok(TorrentFields::CorruptEver),
+            "creator" => Ok(TorrentFields::Creator),
+            "datecreated" => Ok(TorrentFields::DateCreated),
+            "desiredavailable" => Ok(TorrentFields::DesiredAvailable),
+            "donedate" => Ok(TorrentFields::DoneDate),
+            "downloaddir" => Ok(TorrentFields::DownloadDir),
+            "downloadedever" => Ok(TorrentFields::DownloadedEver),
+            "downloadlimit" => Ok(TorrentFields::DownloadLimit),
+            "downloadlimited" => Ok(TorrentFields::DownloadLimited),
+            "editdate" => Ok(TorrentFields::EditDate),
+            "error" => Ok(TorrentFields::Error),
+            "errorstring" => Ok(TorrentFields::ErrorString),
+            "eta" => Ok(TorrentFields::Eta),
+            "etaidle" => Ok(TorrentFields::EtaIdle),
+            "file-count" => Ok(TorrentFields::FileCount),
+            "files" => Ok(TorrentFields::Files),
+            "filestats" => Ok(TorrentFields::FileStats),
+            "hashstring" => Ok(TorrentFields::HashString),
+            "haveunchecked" => Ok(TorrentFields::HaveUnchecked),
+            "havevalid" => Ok(TorrentFields::HaveValid),
+            "honorssessionlimits" => Ok(TorrentFields::HonorsSessionLimits),
+            "id" => Ok(TorrentFields::Id),
+            "isfinished" => Ok(TorrentFields::IsFinished),
+            "isprivate" => Ok(TorrentFields::IsPrivate),
+            "isstalled" => Ok(TorrentFields::IsStalled),
+            "labels" => Ok(TorrentFields::Labels),
+            "leftuntildone" => Ok(TorrentFields::LeftUntilDone),
+            "magnetlink" => Ok(TorrentFields::MagnetLink),
+            "manualannouncetime" => Ok(TorrentFields::ManualAnnounceTime),
+            "maxconnectedpeers" => Ok(TorrentFields::MaxConnectedPeers),
+            "metadatapercentcomplete" => Ok(TorrentFields::MetadataPercentComplete),
+            "name" => Ok(TorrentFields::Name),
+            "peer-limit" => Ok(TorrentFields::PeerLimit),
+            "peers" => Ok(TorrentFields::Peers),
+            "peersconnected" => Ok(TorrentFields::PeersConnected),
+            "peersfrom" => Ok(TorrentFields::PeersFrom),
+            "peersgettingfromus" => Ok(TorrentFields::PeersGettingFromUs),
+            "peerssendingtous" => Ok(TorrentFields::PeersSendingToUs),
+            "percentdone" => Ok(TorrentFields::PercentDone),
+            "pieces" => Ok(TorrentFields::Pieces),
+            "piececount" => Ok(TorrentFields::PieceCount),
+            "piecesize" => Ok(TorrentFields::PieceSize),
+            "priorities" => Ok(TorrentFields::Priorities),
+            "primary-mime-type" => Ok(TorrentFields::PrimaryMimeType),
+            "queueposition" => Ok(TorrentFields::QueuePosition),
+            "ratedownload" => Ok(TorrentFields::RateDownload),
+            "rateupload" => Ok(TorrentFields::RateUpload),
+            "recheckprogress" => Ok(TorrentFields::RecheckProgress),
+            "secondsdownloading" => Ok(TorrentFields::SecondsDownloading),
+            "secondsseeding" => Ok(TorrentFields::SecondsSeeding),
+            "seedidlelimit" => Ok(TorrentFields::SeedIdleLimit),
+            "seedidlemode" => Ok(TorrentFields::SeedIdleMode),
+            "seedratiolimit" => Ok(TorrentFields::SeedRatioLimit),
+            "seedratiomode" => Ok(TorrentFields::SeedRatioMode),
+            "sizewhendone" => Ok(TorrentFields::SizeWhenDone),
+            "startdate" => Ok(TorrentFields::StartDate),
+            "status" => Ok(TorrentFields::Status),
+            "trackers" => Ok(TorrentFields::Trackers),
+            "trackerstats" => Ok(TorrentFields::TrackerStats),
+            "totalsize" => Ok(TorrentFields::TotalSize),
+            "torrentfile" => Ok(TorrentFields::TorrentFile),
+            "uploadedever" => Ok(TorrentFields::UploadedEver),
+            "uploadlimit" => Ok(TorrentFields::UploadLimit),
+            "uploadlimited" => Ok(TorrentFields::UploadLimited),
+            "uploadratio" => Ok(TorrentFields::UploadRatio),
+            "wanted" => Ok(TorrentFields::Wanted),
+            "webseeds" => Ok(TorrentFields::Webseeds),
+            "webseedssendingtous" => Ok(TorrentFields::WebseedsSendingToUs),
+            _ => Err(Error::UnknownTorrentFields),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -1,16 +1,18 @@
+use std::convert::TryInto;
+
 use tokio::runtime::Runtime;
 use tokio::time::{sleep, Duration};
 
 use client::Client;
 use error::Error;
-use torrent::TorrentAddArgs;
+use torrent::{TorrentAddArgs, TorrentGetArgs, TorrentRemoveArgs};
 
-mod client;
-mod error;
-mod request;
-mod response;
-mod session;
-mod torrent;
+pub mod client;
+pub mod error;
+pub mod request;
+pub mod response;
+pub mod session;
+pub mod torrent;
 
 async fn run() -> Result<(), Error> {
     // let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
@@ -43,14 +45,30 @@ async fn run() -> Result<(), Error> {
     // println!("{:?}", body);
 
     let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
-
     let mut client = Client::new(&uri);
-    let args = TorrentAddArgs::from_file(
-        "magnet:?xt=urn:btih:6a0a9282c65fc6a1324e6e1605fe9bb9746c3aa8&dn=test%20dir",
-    )
-    .unwrap();
-    let body = client.torrent_add(args).await.unwrap();
+
+    let get_args = TorrentGetArgs {
+        ids: Some(vec!["6a0a9282c65fc6a1324e6e1605fe9bb9746c3aa8".into()].into()),
+        fields: vec!["id".try_into().unwrap()],
+    };
+
+    let body = client.torrent_get(get_args).await.unwrap();
     dbg!(body);
+
+    let add_args = TorrentAddArgs::from_meta("tests\\test dir.torrent").unwrap();
+
+    let body = client.torrent_add(add_args).await.unwrap();
+    dbg!(body);
+
+    // let del_args = TorrentRemoveArgs {
+    //     ids: Ids::Array(vec![Id::Hash(
+    //         "6a0a9282c65fc6a1324e6e1605fe9bb9746c3aa8".to_string(),
+    //     )]),
+    //     delete_local_data: true,
+    // };
+
+    // let body = client.torrent_remove(del_args).await.unwrap();
+    // dbg!(body);
 
     sleep(Duration::from_millis(1000)).await;
     Ok(())

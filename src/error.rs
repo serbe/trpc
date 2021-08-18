@@ -20,4 +20,6 @@ pub enum Error {
     BothFileMeta,
     #[error("TorrentAdd args no have filename or metadata")]
     NoFileMeta,
+    #[error("Unknown torrent fields")]
+    UnknownTorrentFields,
 }
