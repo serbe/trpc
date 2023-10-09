@@ -67,17 +67,12 @@ impl From<String> for Id {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub enum Ids {
     Id(i64),
     Array(Vec<Id>),
+    #[default]
     RecentlyActive,
-}
-
-impl Default for Ids {
-    fn default() -> Self {
-        Ids::RecentlyActive
-    }
 }
 
 impl From<i64> for Ids {
