@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::io::Read;
 
-use base64::encode_config_buf;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -11,11 +11,10 @@ use crate::request::{Ids, Method, RpcRequest};
 use crate::response::value_from_response;
 
 pub fn file_to_metadata(path: &str) -> Result<String, Error> {
-    let mut file = std::fs::File::open(&path)?;
+    let mut file = std::fs::File::open(path)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
-    let mut buf = String::new();
-    encode_config_buf(buffer, base64::STANDARD, &mut buf);
+    let buf = STANDARD.encode(buffer);
     Ok(buf)
 }
 
