@@ -31,7 +31,7 @@ pub struct FreeSpace {
 
 pub fn value_from_response(response: RpcResponse) -> Result<Value, Error> {
     if &response.result == "success" {
-        Ok(response.arguments.map_or(Err(Error::NoArguments), Ok)?)
+        Ok(response.arguments.ok_or(Error::NoArguments)?)
     } else {
         Err(Error::BadResponse(response.result))
     }
