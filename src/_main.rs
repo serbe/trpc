@@ -15,7 +15,7 @@ pub mod session;
 pub mod torrent;
 
 async fn run() -> Result<(), Error> {
-    // let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
+    // let uri = dotenvy::var("TRPC_TARGET").expect("not set TRPC_TARGET");
     // let mut client = Client::new(&uri);
     // let body = client.session_stats().await?;
     // println!("{:?}", body);
@@ -44,7 +44,7 @@ async fn run() -> Result<(), Error> {
     //     .await?;
     // println!("{:?}", body);
 
-    let uri = dotenv::var("TRPC_TARGET").expect("not set TRPC_TARGET");
+    let uri = dotenvy::var("TRPC_TARGET").expect("not set TRPC_TARGET");
     let mut client = Client::new(&uri);
 
     let get_args = TorrentGetArgs {
@@ -75,7 +75,7 @@ async fn run() -> Result<(), Error> {
 }
 
 fn main() {
-    dotenv::dotenv().ok().unwrap();
+    dotenvy::dotenv().ok().unwrap();
     env_logger::init();
 
     let rt = Runtime::new().unwrap();
